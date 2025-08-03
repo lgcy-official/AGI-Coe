@@ -81,8 +81,8 @@ export default function IntegratedVoiceChat({ character, onBack }: IntegratedVoi
     // OpenAI messages state for debugging
     const [openaiMessages, setOpenaiMessages] = useState<any[]>([])
     
-    // OpenAI API key for error correction
-    const openaiApiKey = "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"
+    // OpenAI API key for error correction - using environment variable or secure storage
+    const openaiApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || ""
 
     const parseAssistantMessage = (content: string) => {
         const corrections: Array<{
@@ -715,7 +715,7 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col lg:flex-row gap-4">
                         <Card className="h-[700px] flex flex-col bg-gray-800 border-gray-700 lg:w-2/3">
-                        <CardContent className="flex-1 p-4 overflow-y-auto space-y-4">
+                            <CardContent className="flex-1 p-4 overflow-y-auto space-y-4">
                             {/* Learning Objectives at the top */}
                             {learningObjectives.length > 0 && (
                                 <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-4">
@@ -794,73 +794,6 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
                                                 </div>
                                             )}
                                         </div>
-
-                                        {/* Integrated Feedback for User Messages */}
-                                        {message.role === 'user' && (message.corrections || message.encouragement) && (
-                                            <div className="flex justify-end">
-                                                <div className="max-w-md space-y-2">
-                                                    {/* Structured corrections/alternatives attached to message */}
-                                                    {message.corrections && message.corrections.length > 0 && (
-                                                        <div className="space-y-2">
-                                                            {message.corrections.map((correction, idx) => (
-                                                                <div
-                                                                    key={idx}
-                                                                    className={`border rounded-lg p-3 ${correction.type === "correction"
-                                                                        ? "bg-red-900/30 border-red-700"
-                                                                        : "bg-blue-900/30 border-blue-700"
-                                                                        }`}
-                                                                >
-                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                        <Badge
-                                                                            variant="secondary"
-                                                                            className={
-                                                                                correction.type === "correction"
-                                                                                    ? "bg-red-700 text-red-100"
-                                                                                    : "bg-blue-700 text-blue-100"
-                                                                            }
-                                                                        >
-                                                                            {correction.type === "correction" ? "Correction" : "Alternative"}
-                                                                        </Badge>
-                                                                    </div>
-                                                                    <p className="text-sm text-gray-300 mb-2">{correction.explanation}</p>
-                                                                    <p className="text-sm">
-                                                                        <span
-                                                                            className={
-                                                                                correction.type === "correction"
-                                                                                    ? "line-through text-red-400"
-                                                                                    : "text-gray-400"
-                                                                            }
-                                                                        >
-                                                                            "{correction.original}"
-                                                                        </span>
-                                                                        {" → "}
-                                                                        <span
-                                                                            className={
-                                                                                correction.type === "correction"
-                                                                                    ? "text-green-400 font-medium"
-                                                                                    : "text-blue-400 font-medium"
-                                                                            }
-                                                                        >
-                                                                            "{correction.corrected}"
-                                                                        </span>
-                                                                    </p>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
-                                                    {/* Encouragement attached to message */}
-                                                    {message.encouragement && (
-                                                        <div className="bg-green-900/30 border border-green-700 rounded-lg p-3">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Badge variant="default" className="text-xs bg-green-600">Encouragement</Badge>
-                                                            </div>
-                                                            <p className="text-sm text-green-200">{message.encouragement}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
                                 ))}
                                 <div ref={messagesEndRef} />
@@ -883,10 +816,10 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
                                     </div>
                                 </div>
                             )}
-                        </CardContent>
+                            </CardContent>
 
-                        {/* Voice Instructions */}
-                        <div className="p-4 border-t border-gray-700">
+                            {/* Voice Instructions */}
+                            <div className="p-4 border-t border-gray-700">
                             <div className="text-center">
                                 <p className="text-sm text-gray-300 mb-2">
                                     🎙️ Use the floating microphone button to start voice chat
@@ -915,8 +848,8 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
                                     </Button>
                                 </div>
                             </div>
-                        </div>
-                    </Card>
+                            </div>
+                        </Card>
                         
                         {/* Error Correction Panel */}
                         <ErrorCorrectionPanel 

@@ -15,7 +15,7 @@ interface ErrorCorrection {
 
 interface ErrorCorrectionPanelProps {
   characterName: string
-  apiKey: string
+  apiKey?: string
 }
 
 export default function ErrorCorrectionPanel({ characterName, apiKey }: ErrorCorrectionPanelProps) {
@@ -30,6 +30,14 @@ export default function ErrorCorrectionPanel({ characterName, apiKey }: ErrorCor
   // Function to process user speech and detect errors
   const processUserSpeech = async (text: string) => {
     if (!text.trim()) return
+    
+    // Check if we have an API key available
+    const apiKeyToUse = apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY
+    if (!apiKeyToUse) {
+      console.error('No OpenAI API key available')
+      setIsLoading(false)
+      return
+    }
     
     setIsLoading(true)
     
@@ -53,7 +61,7 @@ Formatting Rules
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${apiKeyToUse}`
         },
         body: JSON.stringify({
           model: 'gpt-4o-mini',
@@ -89,6 +97,14 @@ Formatting Rules
       }
     } catch (error) {
       console.error('Error processing correction:', error)
+      // Add an error message to the corrections list
+      addCorrection({
+        id: Date.now().toString(),
+        original: text,
+        corrected: "I'm having trouble generating feedback right now",
+        explanation: `Error: ${error instanceof Error ? error.message : 'API connection issue'}. Please try again or check your API key configuration.`,
+        timestamp: new Date()
+      })
     } finally {
       setIsLoading(false)
     }
