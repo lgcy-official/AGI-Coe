@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, MessageCircle, Volume2, Lightbulb } from "lucide-react"
+import ErrorCorrectionPanel from "./error-correction-panel"
 
 
 interface Character {
@@ -79,6 +80,9 @@ export default function IntegratedVoiceChat({ character, onBack }: IntegratedVoi
 
     // OpenAI messages state for debugging
     const [openaiMessages, setOpenaiMessages] = useState<any[]>([])
+    
+    // OpenAI API key for error correction
+    const openaiApiKey = "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"
 
     const parseAssistantMessage = (content: string) => {
         const corrections: Array<{
@@ -253,6 +257,15 @@ export default function IntegratedVoiceChat({ character, onBack }: IntegratedVoi
                             setTimeout(() => {
                                 generateRealTimeFeedback(message.transcript, newMessage.id)
                             }, 100)
+                            
+                            // Emit custom event for error correction panel
+                            const userSpeechEvent = new CustomEvent('user-speech', {
+                                detail: {
+                                    text: message.transcript,
+                                    characterName: character.name
+                                }
+                            })
+                            window.dispatchEvent(userSpeechEvent)
                         }
 
                         // ALSO generate feedback when assistant responds (like regular chat)
@@ -698,9 +711,10 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
             </div>
 
             <div className="p-6">
-                {/* Voice Conversation - Full Width */}
-                <div className="max-w-4xl mx-auto">
-                    <Card className="h-[700px] flex flex-col bg-gray-800 border-gray-700">
+                {/* Voice Conversation with Error Correction Panel */}
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        <Card className="h-[700px] flex flex-col bg-gray-800 border-gray-700 lg:w-2/3">
                         <CardContent className="flex-1 p-4 overflow-y-auto space-y-4">
                             {/* Learning Objectives at the top */}
                             {learningObjectives.length > 0 && (
@@ -762,10 +776,7 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
                                                 />
                                             )}
                                             <div className={`max-w-md ${message.role === 'user' ? 'order-first' : ''}`}>
-                                                <div className={`rounded-lg p-3 ${message.role === 'user'
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-700 text-white'
-                                                    }`}>
+                                                <div className={`rounded-lg p-3 ${message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'}`}>
                                                     <p>{message.content}</p>
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-1">
@@ -906,8 +917,15 @@ Be detailed, constructive, and encouraging. Use the structured format to highlig
                             </div>
                         </div>
                     </Card>
+                        
+                        {/* Error Correction Panel */}
+                        <ErrorCorrectionPanel 
+                            characterName={character.name}
+                            apiKey={openaiApiKey}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
     )
-} 
+}
